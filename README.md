@@ -25,7 +25,7 @@ Bloque (ID de Bloque) -> Isométrico (Plano) -> Trabajo (Montaje/Soldadura) -> O
 ·Entidades Principales y Roles
 Bloque: Bloque estructural físico de la fragata (ej. B322, B631).
 Isométrico: Planos de tuberías asignados a bloques específicos.
-Trabajo: Órdenes individuales de soldadura o montaje con seguimiento de estado (PENDIENTE, EN_EJECUCION, REVISADO, ACEPTADO).
+Trabajo: Órdenes individuales de soldadura o montaje con seguimiento de estado (PENDIENTE, EN_MONTAJE, MONTADO, SOLDADO , REVISADO).
 Operario: Personal técnico del astillero (TUBERO, SOLDADOR, INSPECTOR_CALIDAD).
 
 ·Endpoints
