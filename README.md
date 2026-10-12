@@ -1,22 +1,22 @@
 · NavalWorks 🚢⚙️
 Sistema Backend de Gestión de Trabajos y Trazabilidad Naval (Proyecto Fragatas F-110)
-NavalWorks es una API REST empresarial desarrollada con Spring Boot 3, diseñada para digitalizar la trazabilidad y asignación de trabajos en astilleros navales. 
+NavalWorks es un backend API REST desarrollado con Spring Boot para digitalizar la trazabilidad y asignación de trabajos en astilleros navales. No renderiza pantallas: las aplicaciones nativas de Android o escritorio consumen la API y se encargan de la interfaz.
 Basado en el flujo de montaje de las Fragatas F-110 (Navantia), el sistema gestiona bloques estructurales, planos isométricos, órdenes de trabajo y personal técnico.
 
 · Arquitectura "API-First" y Multiplataforma
-El proyecto sigue una estrategia Backend-First, exponiendo una API JSON estándar y desacoplada que permite conectar múltiples tipos de clientes según las necesidades del astillero:
-Separación por Capas (N-Tier): Organización estricta en Controller, Service, Repository, Model y DTO.
-Patrón DTO: Encapsulamiento del dominio mediante objetos de transferencia de datos (BloqueDTO, IsometricoDTO, TrabajoDTO, OperarioDTO) para garantizar la seguridad de los datos y evitar acoplamiento con la interfaz gráfica.
-Preparado para Clientes Ligeros: Diseñado para responder a peticiones de terminales de escritorio en oficinas técnicas o tablets industriales a pie de obra.
+El proyecto sigue una estrategia Backend-First y expone una API JSON desacoplada:
+Separación por capas: organización en Controller, Service, Repository, Model y DTO.
+Patrón DTO: transferencia de datos mediante BloqueDTO, IsometricoDTO, TrabajoDTO y OperarioDTO, sin exponer directamente las entidades.
+Clientes: preparado para que aplicaciones nativas de Android o escritorio consuman los endpoints REST.
 
 · Stack Tecnológico
-Lenguaje: Java 17+
-Framework Principal: Spring Boot 3.x
+Lenguaje: Java 23
+Framework Principal: Spring Boot 4.1.1
 Persistencia: Spring Data JPA / Hibernate
 Base de Datos: MySQL
-Seguridad: Spring Security 6.x
+Seguridad: Spring Security con HTTP Basic sin estado
 Gestión de Dependencias: Maven
-Cliente Objetivo (En evaluación): Multiplataforma (JavaFX / Flutter)
+Interfaz de usuario: responsabilidad exclusiva de las aplicaciones cliente; el backend no utiliza Thymeleaf.
 
 · Modelo de Dominio
 Jerarquía del dominio:
@@ -29,18 +29,17 @@ Trabajo: Órdenes individuales de soldadura o montaje con seguimiento de estado 
 Operario: Personal técnico del astillero (TUBERO, SOLDADOR, INSPECTOR_CALIDAD).
 
 ·Endpoints
-Actualmente, la capa de controladores y exposición de servicios REST se encuentra en proceso de implementación y ajuste. 
-La estructura planificada para la API sigue el estándar RESTful con las siguientes rutas principales:
-Módulo de Bloques (/api/bloques): Consulta de bloques estructurales y agregación de estados de montaje.
-Módulo de Isométricos (/api/isometricos): Gestión de planos de tubería asociados a cada bloque.
-Módulo de Trabajos (/api/trabajos): Creación, asignación y cambio de estado de órdenes de trabajo (soldadura/montaje).
-Módulo de Operarios (/api/operarios): Gestión de personal y roles técnicos del astillero.
-Autenticación (/api/auth / /login): Gestión de credenciales y control de acceso por roles con Spring Security.
+La API REST dispone de operaciones de consulta y gestión para los siguientes recursos:
+Módulo de Bloques (/api/bloques): CRUD y búsqueda por código.
+Módulo de Isométricos (/api/isometricos): CRUD, búsqueda y gestión de PDFs de planos de tubería.
+Módulo de Trabajos (/api/trabajos): CRUD y consulta por isométrico, estado u operario.
+Módulo de Operarios (/api/operarios): CRUD y búsqueda por especialista, nombre o apellidos.
+Autenticación: las rutas protegidas utilizan HTTP Basic; el cliente envía las credenciales en la cabecera Authorization. La creación de operarios (POST /api/operarios) está permitida sin autenticación.
 
 
 · Ejecución Local
 Requisitos Previos
-JDK 17 o superior
+JDK 23
 Maven 3.8+
 MySQL 8.0+
 Instalación y Despliegue
