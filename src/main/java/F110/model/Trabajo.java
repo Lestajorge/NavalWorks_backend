@@ -4,6 +4,7 @@ import F110.model.Operario;
 import F110.enums.model.EstadoTrabajo;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -11,7 +12,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "trabajos")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -39,6 +41,7 @@ public class Trabajo {
     @Builder.Default
     private Set<Operario> operarios = new HashSet<>();
 
+    @UpdateTimestamp
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
 
