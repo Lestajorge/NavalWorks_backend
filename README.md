@@ -34,7 +34,9 @@ Módulo de Bloques (/api/bloques): CRUD y búsqueda por código.
 Módulo de Isométricos (/api/isometricos): CRUD, búsqueda y gestión de PDFs de planos de tubería.
 Módulo de Trabajos (/api/trabajos): CRUD y consulta por isométrico, estado u operario.
 Módulo de Operarios (/api/operarios): CRUD y búsqueda por especialista, nombre o apellidos.
-Autenticación: las rutas protegidas utilizan HTTP Basic; el cliente envía las credenciales en la cabecera Authorization. La creación de operarios (POST /api/operarios) está permitida sin autenticación.
+Autenticación: el inicio de sesión normal valida las credenciales del operario. Para activar el modo administrador, el cliente solicita de nuevo las credenciales y usa HTTP Basic con esa cuenta. Las operaciones de escritura requieren el rol de administrador; la creación de operarios (POST /api/operarios) sigue permitida sin autenticación.
+
+La cuenta inicial se crea al arrancar si se configura `APP_ADMIN_PASSWORD` (el usuario es `admin` por defecto). Por ejemplo: `APP_ADMIN_PASSWORD=<tu-contraseña-inicial> ./mvnw spring-boot:run`. La contraseña queda almacenada con BCrypt y no se sobrescribe si la cuenta ya existe. Cambia la contraseña inicial antes de desplegar en un entorno real.
 
 
 · Ejecución Local

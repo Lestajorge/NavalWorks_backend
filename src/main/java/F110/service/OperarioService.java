@@ -19,7 +19,7 @@ public class OperarioService implements IOperarioService {
 
     @Override
     public List<Operario> findAll() {
-        return operarioRepository.findAll();
+        return operarioRepository.findByAdministradorFalse();
     }
 
     @Override
@@ -31,17 +31,17 @@ public class OperarioService implements IOperarioService {
 
     @Override
     public List<Operario> findByEspecialista(Especialista especialista) {
-        return operarioRepository.findByEspecialista(especialista);
+        return operarioRepository.findByAdministradorFalseAndEspecialista(especialista);
     }
 
     @Override
     public List<Operario> findByNombre(String nombre) {
-        return operarioRepository.findByNombreContainingIgnoreCase(nombre);
+        return operarioRepository.findByAdministradorFalseAndNombreContainingIgnoreCase(nombre);
     }
 
     @Override
     public List<Operario> findByApellidos(String apellidos) {
-        return operarioRepository.findByApellidosContainingIgnoreCase(apellidos);
+        return operarioRepository.findByAdministradorFalseAndApellidosContainingIgnoreCase(apellidos);
     }
 
     @Override

@@ -13,6 +13,14 @@ public interface OperarioRepository extends JpaRepository<Operario, Long> {
 
     List<Operario> findByEspecialista(Especialista especialista);
 
+    List<Operario> findByAdministradorFalse();
+
+    List<Operario> findByAdministradorFalseAndEspecialista(Especialista especialista);
+
+    List<Operario> findByAdministradorFalseAndNombreContainingIgnoreCase(String nombre);
+
+    List<Operario> findByAdministradorFalseAndApellidosContainingIgnoreCase(String apellidos);
+
     List<Operario> findByNombreContainingIgnoreCase(String nombre);
 
     List<Operario> findByApellidosContainingIgnoreCase(String apellidos);

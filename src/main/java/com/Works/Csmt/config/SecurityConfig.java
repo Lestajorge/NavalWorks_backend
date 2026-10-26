@@ -51,7 +51,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/admin").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/operarios").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/bloques").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

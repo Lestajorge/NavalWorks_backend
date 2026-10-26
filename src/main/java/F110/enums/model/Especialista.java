@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum Especialista {
     TUBERO("Oficial de Tubería y Montaje"),
     SOLDADOR("Oficial de Soldadura"),
-    INSPECTOR_QC("Inspector de Control de Calidad");
+    ENCARGADO("Encargado");
 
     private final String descripcion;
 
