@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import F110.model.EstadoIsometrico;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,9 @@ public class IsometricoDTO {
     private Long id;
     private String codigoIsometrico;
     private String lineaTuberia;
+    private String sistema;
+    private String revision;
+    private EstadoIsometrico estado;
     private Long bloqueId;
     private String pdfUrl;
 

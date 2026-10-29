@@ -1,6 +1,7 @@
 package F110.controller;
 
 import F110.dto.IsometricoDTO;
+import F110.model.EstadoIsometrico;
 import F110.model.Isometrico;
 import F110.service.IBloqueService;
 import F110.service.IIsometricoService;
@@ -32,6 +33,13 @@ public class IsometricoController {
                 .toList();
     }
 
+    @GetMapping("/admin")
+    public List<IsometricoDTO> findAllForAdmin() {
+        return isometricoService.findAllForAdmin().stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
     @GetMapping("/{id}")
     public IsometricoDTO findById(@PathVariable Long id) {
         return toDTO(isometricoService.findById(id));
@@ -49,12 +57,7 @@ public class IsometricoController {
                 .toList();
     }
 
-    @GetMapping("/linea/{lineaTuberia}")
-    public List<IsometricoDTO> findByLinea(@PathVariable String lineaTuberia) {
-        return isometricoService.findByLineaTuberia(lineaTuberia).stream()
-                .map(this::toDTO)
-                .toList();
-    }
+
 
     @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<Resource> getPdf(@PathVariable Long id) throws IOException {
@@ -73,6 +76,23 @@ public class IsometricoController {
                 .body(toDTO(isometricoService.save(toEntity(dto))));
     }
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<IsometricoDTO> createDraft(
+            @RequestParam String codigoIsometrico,
+            @RequestParam String sistema,
+            @RequestParam String revision,
+            @RequestParam Long bloqueId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        Isometrico isometrico = new Isometrico();
+        isometrico.setCodigoIsometrico(codigoIsometrico);
+        isometrico.setLineaTuberia(sistema);
+        isometrico.setSistema(sistema);
+        isometrico.setRevision(revision);
+        isometrico.setBloque(bloqueService.findById(bloqueId));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toDTO(isometricoService.createDraft(isometrico, file)));
+    }
+
     @PostMapping(value = "/{id}/pdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public IsometricoDTO uploadPdf(
             @PathVariable Long id,
@@ -85,6 +105,13 @@ public class IsometricoController {
         return toDTO(isometricoService.update(id, toEntity(dto)));
     }
 
+    @PutMapping("/{id}/estado")
+    public IsometricoDTO updateEstado(
+            @PathVariable Long id,
+            @RequestBody EstadoRequest request) {
+        return toDTO(isometricoService.updateEstado(id, request.estado()));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         isometricoService.delete(id);
@@ -95,6 +122,8 @@ public class IsometricoController {
         Isometrico isometrico = new Isometrico();
         isometrico.setCodigoIsometrico(dto.getCodigoIsometrico());
         isometrico.setLineaTuberia(dto.getLineaTuberia());
+        isometrico.setSistema(dto.getSistema());
+        isometrico.setRevision(dto.getRevision());
         isometrico.setBloque(bloqueService.findById(dto.getBloqueId()));
         isometrico.setPdfUrl(dto.getPdfUrl());
         return isometrico;
@@ -105,6 +134,9 @@ public class IsometricoController {
                 .id(isometrico.getId())
                 .codigoIsometrico(isometrico.getCodigoIsometrico())
                 .lineaTuberia(isometrico.getLineaTuberia())
+                .sistema(isometrico.getSistema())
+                .revision(isometrico.getRevision())
+                .estado(isometrico.getEstado())
                 .bloqueId(isometrico.getBloque().getId())
                 .pdfUrl(isometrico.getPdfUrl())
                 .trabajoIds(isometrico.getTrabajos().stream()
@@ -112,4 +144,6 @@ public class IsometricoController {
                         .toList())
                 .build();
     }
+
+    public record EstadoRequest(EstadoIsometrico estado) {}
 }

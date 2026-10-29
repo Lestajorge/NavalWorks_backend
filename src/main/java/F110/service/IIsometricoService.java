@@ -1,6 +1,7 @@
 package F110.service;
 
 import F110.model.Isometrico;
+import F110.model.EstadoIsometrico;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,7 +18,13 @@ public interface IIsometricoService {
 
     List<Isometrico> findByBloqueId(Long bloqueId);
 
-    List<Isometrico> findByLineaTuberia(String lineaTuberia);
+
+
+    List<Isometrico> findAllForAdmin();
+
+    Isometrico createDraft(Isometrico isometrico, MultipartFile file) throws IOException;
+
+    Isometrico updateEstado(Long id, EstadoIsometrico estado);
 
     Isometrico save(Isometrico isometrico);
 

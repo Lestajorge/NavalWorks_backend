@@ -2,6 +2,7 @@ package F110.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,18 @@ public class Isometrico {
 
     @Column(name = "linea_tuberia", nullable = false, length = 50)
     private String lineaTuberia; // Ejemplo: "L-410-01"
+
+    @Column(length = 50)
+    private String sistema;
+
+    @Column(length = 50)
+    private String revision;
+
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'PUBLICADO'")
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private EstadoIsometrico estado = EstadoIsometrico.BORRADOR;
 
     @Column(name = "pdf_url", length = 500)
     private String pdfUrl;

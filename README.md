@@ -36,6 +36,14 @@ Módulo de Trabajos (/api/trabajos): CRUD y consulta por isométrico, estado u o
 Módulo de Operarios (/api/operarios): CRUD y búsqueda por especialista, nombre o apellidos.
 Autenticación: el inicio de sesión normal valida las credenciales del operario. Para activar el modo administrador, el cliente solicita de nuevo las credenciales y usa HTTP Basic con esa cuenta. Las operaciones de escritura requieren el rol de administrador; la creación de operarios (POST /api/operarios) sigue permitida sin autenticación.
 
+Gestión de isométricos para administradores:
+- `GET /api/isometricos/admin` devuelve todos los isométricos, incluidos borradores y archivados; requiere rol de administrador.
+- `POST /api/isometricos` consume `multipart/form-data` con `codigoIsometrico`, `sistema`, `revision`, `bloqueId` y el PDF en el campo `file`. Crea el registro como `BORRADOR`.
+- `PUT /api/isometricos/{id}/estado` recibe JSON como `{"estado":"PUBLICADO"}` o `{"estado":"ARCHIVADO"}`. Solo permite esos dos estados; publicar requiere que el isométrico tenga PDF.
+- Los endpoints normales de consulta y la consulta por bloque solo muestran isométricos `PUBLICADO`, para impedir asignar borradores o archivados.
+- Los estados posibles son `BORRADOR`, `PUBLICADO` y `ARCHIVADO`.
+
+
 La cuenta inicial se crea al arrancar si se configura `APP_ADMIN_PASSWORD` (el usuario es `admin` por defecto). Por ejemplo: `APP_ADMIN_PASSWORD=<tu-contraseña-inicial> ./mvnw spring-boot:run`. La contraseña queda almacenada con BCrypt y no se sobrescribe si la cuenta ya existe. Cambia la contraseña inicial antes de desplegar en un entorno real.
 
 
