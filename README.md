@@ -38,7 +38,7 @@ Autenticación: el inicio de sesión normal valida las credenciales del operario
 
 Gestión de isométricos para administradores:
 - `GET /api/isometricos/admin` devuelve todos los isométricos, incluidos borradores y archivados; requiere rol de administrador.
-- `POST /api/isometricos` consume `multipart/form-data` con `codigoIsometrico`, `sistema`, `revision`, `bloqueId` y el PDF en el campo `file`. Crea el registro como `BORRADOR`.
+- `POST /api/isometricos` consume `multipart/form-data` con `codigoIsometrico`, `revision`, `bloqueId` y el PDF en el campo `file`; al guardar el PDF, crea el registro como `PUBLICADO`. En el alta JSON, se publica si se proporciona `pdfUrl`; si no, queda como `BORRADOR`.
 - `PUT /api/isometricos/{id}/estado` recibe JSON como `{"estado":"PUBLICADO"}` o `{"estado":"ARCHIVADO"}`. Solo permite esos dos estados; publicar requiere que el isométrico tenga PDF.
 - Los endpoints normales de consulta y la consulta por bloque solo muestran isométricos `PUBLICADO`, para impedir asignar borradores o archivados.
 - Los estados posibles son `BORRADOR`, `PUBLICADO` y `ARCHIVADO`.
