@@ -28,10 +28,6 @@ public class Isometrico {
     @Column(name = "codigo_isometrico", nullable = false, unique = true, length = 50)
     private String codigoIsometrico; // Ejemplo: "ISO-410-01-A"
 
-    /** Revisión del documento. */
-    @Column(length = 50)
-    private String revision;
-
     /** Estado del isométrico, guardado en la base de datos por su nombre. */
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'PUBLICADO'")

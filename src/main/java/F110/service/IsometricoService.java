@@ -101,13 +101,12 @@ public class IsometricoService implements IIsometricoService {
         return isometricoRepository.save(isometrico);
     }
 
-    /** Actualiza el código, la revisión y el bloque de un isométrico publicado. */
+    /** Actualiza el código y el bloque de un isométrico publicado. */
     @Override
     public Isometrico update(Long id, Isometrico isometrico) {
         Isometrico isometricoExistente = findById(id);
         isometricoExistente.setCodigoIsometrico(isometrico.getCodigoIsometrico());
 
-        isometricoExistente.setRevision(isometrico.getRevision());
         isometricoExistente.setBloque(isometrico.getBloque());
         return isometricoRepository.save(isometricoExistente);
     }

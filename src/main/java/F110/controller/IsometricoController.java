@@ -126,7 +126,6 @@ public class IsometricoController {
      * Crea y publica un isométrico asociado a un bloque y a un archivo PDF.
      *
      * @param codigoIsometrico código del isométrico
-     * @param revision revisión del isométrico
      * @param bloqueId identificador del bloque asociado
      * @param file archivo PDF recibido
      * @return respuesta con el isométrico publicado y estado 201
@@ -135,12 +134,10 @@ public class IsometricoController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<IsometricoDTO> createPublished(
             @RequestParam String codigoIsometrico,
-            @RequestParam String revision,
             @RequestParam Long bloqueId,
             @RequestParam("file") MultipartFile file) throws IOException {
         Isometrico isometrico = new Isometrico();
         isometrico.setCodigoIsometrico(codigoIsometrico);
-        isometrico.setRevision(revision);
         isometrico.setBloque(bloqueService.findById(bloqueId));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(toDTO(isometricoService.createPublished(isometrico, file)));
@@ -208,7 +205,6 @@ public class IsometricoController {
     private Isometrico toEntity(IsometricoDTO dto) {
         Isometrico isometrico = new Isometrico();
         isometrico.setCodigoIsometrico(dto.getCodigoIsometrico());
-        isometrico.setRevision(dto.getRevision());
         isometrico.setBloque(bloqueService.findById(dto.getBloqueId()));
         isometrico.setPdfUrl(dto.getPdfUrl());
         return isometrico;
@@ -224,7 +220,6 @@ public class IsometricoController {
         return IsometricoDTO.builder()
                 .id(isometrico.getId())
                 .codigoIsometrico(isometrico.getCodigoIsometrico())
-                .revision(isometrico.getRevision())
                 .estado(isometrico.getEstado())
                 .bloqueId(isometrico.getBloque().getId())
                 .pdfUrl(isometrico.getPdfUrl())

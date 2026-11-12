@@ -25,9 +25,6 @@ public class IsometricoDTO {
     /** Código identificador del isométrico. */
     private String codigoIsometrico;
 
-    /** Revisión del documento isométrico. */
-    private String revision;
-
     /** Estado actual del isométrico. */
     private EstadoIsometrico estado;
 
