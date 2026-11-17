@@ -30,11 +30,11 @@ Operario: Personal técnico del astillero (TUBERO, SOLDADOR, INSPECTOR_CALIDAD).
 
 ·Endpoints
 La API REST dispone de operaciones de consulta y gestión para los siguientes recursos:
-Módulo de Bloques (/api/bloques): CRUD y búsqueda por código.
+Módulo de Bloques (/api/bloques): CRUD y búsqueda por código. `GET /api/bloques` devuelve la lista de bloques; no es el endpoint de inicio de sesión.
 Módulo de Isométricos (/api/isometricos): CRUD, búsqueda y gestión de PDFs de planos de tubería.
 Módulo de Trabajos (/api/trabajos): CRUD y consulta por isométrico, estado u operario.
 Módulo de Operarios (/api/operarios): CRUD y búsqueda por especialista, nombre o apellidos.
-Autenticación: el inicio de sesión normal valida las credenciales del operario. Para activar el modo administrador, el cliente solicita de nuevo las credenciales y usa HTTP Basic con esa cuenta. Las operaciones de escritura requieren el rol de administrador; la creación de operarios (POST /api/operarios) sigue permitida sin autenticación.
+Autenticación: `POST /api/auth/admin` comprueba las credenciales y confirma que la cuenta tenga el rol de administrador. Las peticiones protegidas, incluidas las consultas GET, se autentican aparte mediante HTTP Basic sin estado; ese control lo aplica Spring Security, no la lógica de `GET /api/bloques`. Las operaciones de escritura requieren el rol de administrador; la creación de operarios (POST /api/operarios) sigue permitida sin autenticación.
 
 Gestión de isométricos para administradores:
 - `GET /api/isometricos/admin` devuelve todos los isométricos, incluidos borradores y archivados; requiere rol de administrador.
