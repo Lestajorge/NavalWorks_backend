@@ -5,7 +5,6 @@ import F110.repository.OperarioRepository;
 import F110.enums.model.Especialista;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.List;
 public class OperarioService implements IOperarioService {
 
     private final OperarioRepository operarioRepository;
-    private final PasswordEncoder passwordEncoder;
 
     /** Obtiene únicamente las cuentas que no son de administrador. */
     @Override
@@ -27,7 +25,7 @@ public class OperarioService implements IOperarioService {
     /** Busca un operario por identificador y lanza una excepción si no existe. */
     @Override
     public Operario findById(Long id) {
-        return operarioRepository.findById(id)
+        return operarioRepository.findByIdAndAdministradorFalse(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "No existe el operario con id: " + id));
     }
@@ -50,10 +48,12 @@ public class OperarioService implements IOperarioService {
         return operarioRepository.findByAdministradorFalseAndApellidosContainingIgnoreCase(apellidos);
     }
 
-    /** Codifica la contraseña antes de guardar el operario. */
+    /** Guarda un operario de plantilla sin credenciales de acceso. */
     @Override
     public Operario save(Operario operario) {
-        operario.setPassword(passwordEncoder.encode(operario.getPassword()));
+        operario.setUsuario(null);
+        operario.setPassword(null);
+        operario.setAdministrador(false);
         return operarioRepository.save(operario);
     }
 
@@ -63,11 +63,7 @@ public class OperarioService implements IOperarioService {
         Operario operarioExistente = findById(id);
         operarioExistente.setNombre(operario.getNombre());
         operarioExistente.setApellidos(operario.getApellidos());
-        operarioExistente.setUsuario(operario.getUsuario());
         operarioExistente.setEspecialista(operario.getEspecialista());
-        if (operario.getPassword() != null && !operario.getPassword().isBlank()) {
-            operarioExistente.setPassword(passwordEncoder.encode(operario.getPassword()));
-        }
         return operarioRepository.save(operarioExistente);
     }
 

@@ -29,6 +29,12 @@ public interface ITrabajoService {
     /** Actualiza los datos del trabajo indicado. */
     Trabajo update(Long id, Trabajo trabajo);
 
+    /** Añade un operario al trabajo indicado. */
+    Trabajo addOperario(Long trabajoId, Long operarioId);
+
+    /** Quita un operario del trabajo indicado. */
+    Trabajo removeOperario(Long trabajoId, Long operarioId);
+
     /** Elimina el trabajo indicado. */
     void delete(Long id);
 }

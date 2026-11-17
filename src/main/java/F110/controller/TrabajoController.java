@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Expone las operaciones de la API para consultar y administrar trabajos.
+ * Expone las operaciones de la API para consultar y administrar trabajos,
+ * incluidas las asignaciones de operarios.
  *
  * Recibe peticiones bajo /api/trabajos, delega las operaciones al servicio
  * y convierte las entidades al formato TrabajoDTO.
@@ -115,6 +116,22 @@ public class TrabajoController {
     @PutMapping("/{id}")
     public TrabajoDTO update(@PathVariable Long id, @RequestBody TrabajoDTO dto) {
         return toDTO(trabajoService.update(id, toEntity(dto)));
+    }
+
+    /** Añade un operario al trabajo sin modificar el resto de sus datos. */
+    @PostMapping("/{id}/operarios/{operarioId}")
+    public TrabajoDTO addOperario(
+            @PathVariable Long id,
+            @PathVariable Long operarioId) {
+        return toDTO(trabajoService.addOperario(id, operarioId));
+    }
+
+    /** Quita un operario del trabajo sin modificar el resto de sus datos. */
+    @DeleteMapping("/{id}/operarios/{operarioId}")
+    public TrabajoDTO removeOperario(
+            @PathVariable Long id,
+            @PathVariable Long operarioId) {
+        return toDTO(trabajoService.removeOperario(id, operarioId));
     }
 
     /**

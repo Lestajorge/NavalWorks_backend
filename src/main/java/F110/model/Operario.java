@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Entidad JPA que representa a un operario y su cuenta en el sistema.
+ * Entidad JPA que representa a un operario o una cuenta administradora.
  * Se almacena en la tabla {@code operarios}.
  */
 @Entity
@@ -33,12 +33,12 @@ public class Operario {
     @Column(nullable = false, length = 100)
     private String apellidos;
 
-    /** Nombre de usuario único utilizado para iniciar sesión. */
-    @Column(nullable = false, unique = true, length = 50)
+    /** Nombre de usuario; solo las cuentas administradoras tienen credenciales. */
+    @Column(nullable = true, unique = true, length = 50)
     private String usuario;
 
-    /** Contraseña almacenada como hash, no como texto plano. */
-    @Column(name = "password_hash", nullable = false, length = 100)
+    /** Contraseña almacenada como hash; es nula para operarios sin cuenta. */
+    @Column(name = "password_hash", nullable = true, length = 100)
     private String password;
 
     /** Indica si la cuenta tiene permisos de administrador. */

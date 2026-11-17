@@ -44,6 +44,7 @@ public class AdminAccountInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (password.isBlank()) {
+            operarioRepository.clearCredentialsForNonAdministrators();
             log.info("Creación de administrador omitida: configura APP_ADMIN_PASSWORD");
             return;
         }
@@ -63,6 +64,7 @@ public class AdminAccountInitializer implements ApplicationRunner {
         }
 
         operarioRepository.save(admin);
+        operarioRepository.clearCredentialsForNonAdministrators();
         log.info("Cuenta administradora '{}' comprobada", username);
     }
 }

@@ -7,8 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Datos necesarios para crear un operario, incluidos los datos de acceso
- * que se usarán para registrar su cuenta.
+ * Datos de plantilla necesarios para crear o actualizar un operario.
  */
 @Data
 @Builder
@@ -25,9 +24,4 @@ public class OperarioCreateDTO {
     /** Especialidad que se asignará al operario. */
     private Especialista especialista;
 
-    /** Nombre de usuario para la cuenta del operario. */
-    private String usuario;
-
-    /** Contraseña inicial de la cuenta del operario. */
-    private String password;
 }

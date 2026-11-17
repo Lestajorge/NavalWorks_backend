@@ -73,11 +73,9 @@ public class SecurityConfig {
      * Define las reglas de seguridad para las peticiones HTTP de la aplicación.
      *
      * Los administradores pueden usar todos los endpoints de la API. Los
-     * operarios pueden consultar operarios, hacer cualquier operación sobre
-     * trabajos y consultar isométricos. Para el resto de endpoints se exige el
-     * rol de administrador. El inicio de sesión de administrador es público.
-     * Usa HTTP Basic, no crea sesiones y responde con estado 401 si falta la
-     * autenticación requerida.
+     * operarios pueden consultar la API y añadir o quitar operarios de un
+     * trabajo. El inicio de sesión de administrador es público. Usa HTTP Basic,
+     * no crea sesiones y responde con estado 401 si falta la autenticación.
      *
      * @param http configuración HTTP de Spring Security
      * @return cadena de filtros que aplica las reglas de seguridad
@@ -89,22 +87,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/admin").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/isometricos/admin").hasRole("ADMINISTRADOR")
-                        .requestMatchers(HttpMethod.GET, "/api/operarios", "/api/operarios/**")
+                        .requestMatchers(HttpMethod.GET, "/api/**")
                         .hasAnyRole("ADMINISTRADOR", "OPERARIO")
-                        .requestMatchers(HttpMethod.GET, "/api/trabajos", "/api/trabajos/**")
+                        .requestMatchers(HttpMethod.POST, "/api/trabajos/*/operarios/*")
                         .hasAnyRole("ADMINISTRADOR", "OPERARIO")
-                        .requestMatchers(HttpMethod.POST, "/api/trabajos", "/api/trabajos/**")
+                        .requestMatchers(HttpMethod.DELETE, "/api/trabajos/*/operarios/*")
                         .hasAnyRole("ADMINISTRADOR", "OPERARIO")
-                        .requestMatchers(HttpMethod.PUT, "/api/trabajos", "/api/trabajos/**")
-                        .hasAnyRole("ADMINISTRADOR", "OPERARIO")
-                        .requestMatchers(HttpMethod.DELETE, "/api/trabajos", "/api/trabajos/**")
-                        .hasAnyRole("ADMINISTRADOR", "OPERARIO")
-                        .requestMatchers(HttpMethod.GET, "/api/isometricos", "/api/isometricos/**")
-                        .hasAnyRole("ADMINISTRADOR", "OPERARIO")
-                        .requestMatchers(HttpMethod.PUT, "/api/isometricos", "/api/isometricos/**")
+                        .requestMatchers("/api/**")
                         .hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/**").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

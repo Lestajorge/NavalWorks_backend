@@ -133,8 +133,6 @@ public class OperarioController {
         Operario operario = new Operario();
         operario.setNombre(dto.getNombre());
         operario.setApellidos(dto.getApellidos());
-        operario.setUsuario(dto.getUsuario());
-        operario.setPassword(dto.getPassword());
         operario.setEspecialista(dto.getEspecialista());
         return operario;
     }

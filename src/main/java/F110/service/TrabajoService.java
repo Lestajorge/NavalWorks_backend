@@ -1,11 +1,14 @@
 package F110.service;
 
 import F110.enums.model.EstadoTrabajo;
+import F110.model.Operario;
 import F110.model.Trabajo;
+import F110.repository.OperarioRepository;
 import F110.repository.TrabajoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,6 +18,7 @@ import java.util.List;
 public class TrabajoService implements ITrabajoService {
 
     private final TrabajoRepository trabajoRepository;
+    private final OperarioRepository operarioRepository;
 
     /** Devuelve todos los trabajos almacenados. */
     @Override
@@ -62,6 +66,30 @@ public class TrabajoService implements ITrabajoService {
         trabajoExistente.setIsometrico(trabajo.getIsometrico());
         trabajoExistente.setOperarios(trabajo.getOperarios());
         return trabajoRepository.save(trabajoExistente);
+    }
+
+    /** Añade al trabajo el operario indicado. */
+    @Override
+    @Transactional
+    public Trabajo addOperario(Long trabajoId, Long operarioId) {
+        Trabajo trabajo = findById(trabajoId);
+        Operario operario = operarioRepository.findById(operarioId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe el operario con id: " + operarioId));
+        trabajo.getOperarios().add(operario);
+        return trabajoRepository.save(trabajo);
+    }
+
+    /** Quita del trabajo el operario indicado. */
+    @Override
+    @Transactional
+    public Trabajo removeOperario(Long trabajoId, Long operarioId) {
+        Trabajo trabajo = findById(trabajoId);
+        Operario operario = operarioRepository.findById(operarioId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "No existe el operario con id: " + operarioId));
+        trabajo.getOperarios().remove(operario);
+        return trabajoRepository.save(trabajo);
     }
 
     /** Elimina el trabajo indicado, si existe. */
