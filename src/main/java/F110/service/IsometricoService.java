@@ -5,7 +5,9 @@ import F110.model.EstadoIsometrico;
 import F110.repository.IsometricoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 /** Implementa la lógica de negocio para isométricos, estados y archivos PDF. */
 @Service
@@ -63,42 +66,26 @@ public class IsometricoService implements IIsometricoService {
         return isometricoRepository.findAll();
     }
 
-    /** Valida el PDF, crea el isométrico como borrador y lo publica tras guardar el archivo. */
+    /** Guarda el PDF antes de persistir el isométrico ya publicado. */
     @Override
     public Isometrico createPublished(Isometrico isometrico, MultipartFile file) throws IOException {
         validatePdf(file);
-        isometrico.setEstado(EstadoIsometrico.BORRADOR);
-        Isometrico saved = isometricoRepository.save(isometrico);
-        Isometrico uploaded = uploadPdf(saved.getId(), file);
-        uploaded.setEstado(EstadoIsometrico.PUBLICADO);
-        return isometricoRepository.save(uploaded);
-    }
+        Files.createDirectories(PDF_DIRECTORY);
 
-    /** Actualiza el estado; impide usar BORRADOR y publicar si falta el PDF. */
-    @Override
-    public Isometrico updateEstado(Long id, EstadoIsometrico estado) {
-        if (estado == null || estado == EstadoIsometrico.BORRADOR) {
-            throw new IllegalArgumentException("El estado debe ser PUBLICADO o ARCHIVADO");
+        Path destination = PDF_DIRECTORY.resolve(UUID.randomUUID() + ".pdf");
+        try {
+            file.transferTo(destination);
+            isometrico.setPdfUrl("/uploads/isometricos/" + destination.getFileName());
+            isometrico.setEstado(EstadoIsometrico.PUBLICADO);
+            return isometricoRepository.save(isometrico);
+        } catch (IOException | RuntimeException | Error exception) {
+            try {
+                Files.deleteIfExists(destination);
+            } catch (IOException cleanupException) {
+                exception.addSuppressed(cleanupException);
+            }
+            throw exception;
         }
-
-        Isometrico isometrico = isometricoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "No existe el isométrico con id: " + id));
-        if (estado == EstadoIsometrico.PUBLICADO && !hasPdfUrl(isometrico)) {
-            throw new IllegalStateException("No se puede publicar un isométrico sin PDF");
-        }
-
-        isometrico.setEstado(estado);
-        return isometricoRepository.save(isometrico);
-    }
-
-    /** Guarda el isométrico como publicado si tiene PDF y como borrador si no lo tiene. */
-    @Override
-    public Isometrico save(Isometrico isometrico) {
-        isometrico.setEstado(hasPdfUrl(isometrico)
-                ? EstadoIsometrico.PUBLICADO
-                : EstadoIsometrico.BORRADOR);
-        return isometricoRepository.save(isometrico);
     }
 
     /** Actualiza el código y el bloque de un isométrico publicado. */
@@ -133,12 +120,12 @@ public class IsometricoService implements IIsometricoService {
     /** Comprueba que el archivo exista y que su nombre termine en {@code .pdf}. */
     private void validatePdf(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("El archivo PDF no puede estar vacío");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo PDF no puede estar vacío");
         }
 
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".pdf")) {
-            throw new IllegalArgumentException("El archivo debe tener extensión .pdf");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo debe tener extensión .pdf");
         }
     }
 

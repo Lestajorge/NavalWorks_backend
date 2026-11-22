@@ -5,7 +5,10 @@ import F110.repository.OperarioRepository;
 import F110.enums.model.Especialista;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -15,6 +18,7 @@ import java.util.List;
 public class OperarioService implements IOperarioService {
 
     private final OperarioRepository operarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /** Obtiene únicamente las cuentas que no son de administrador. */
     @Override
@@ -48,12 +52,21 @@ public class OperarioService implements IOperarioService {
         return operarioRepository.findByAdministradorFalseAndApellidosContainingIgnoreCase(apellidos);
     }
 
-    /** Guarda un operario de plantilla sin credenciales de acceso. */
+    /** Guarda un operario y, si es administrador, almacena sus credenciales protegidas. */
     @Override
     public Operario save(Operario operario) {
-        operario.setUsuario(null);
-        operario.setPassword(null);
-        operario.setAdministrador(false);
+        if (operario.isAdministrador()) {
+            if (operario.getUsuario() == null || operario.getUsuario().isBlank()
+                    || operario.getPassword() == null || operario.getPassword().isBlank()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "El encargado debe tener usuario y contraseña");
+            }
+            operario.setUsuario(operario.getUsuario().trim());
+            operario.setPassword(passwordEncoder.encode(operario.getPassword()));
+        } else {
+            operario.setUsuario(null);
+            operario.setPassword(null);
+        }
         return operarioRepository.save(operario);
     }
 

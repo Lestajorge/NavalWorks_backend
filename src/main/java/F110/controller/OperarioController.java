@@ -5,6 +5,7 @@ import F110.dto.OperarioCreateDTO;
 import F110.model.Operario;
 import F110.service.IOperarioService;
 import F110.enums.model.Especialista;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -94,7 +95,7 @@ public class OperarioController {
      * @return respuesta con el operario creado
      */
     @PostMapping
-    public ResponseEntity<OperarioDTO> save(@RequestBody OperarioCreateDTO dto) {
+    public ResponseEntity<OperarioDTO> save(@Valid @RequestBody OperarioCreateDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(toDTO(operarioService.save(toEntity(dto))));
     }
@@ -134,6 +135,9 @@ public class OperarioController {
         operario.setNombre(dto.getNombre());
         operario.setApellidos(dto.getApellidos());
         operario.setEspecialista(dto.getEspecialista());
+        operario.setUsuario(dto.getUsuario());
+        operario.setPassword(dto.getPassword());
+        operario.setAdministrador(Integer.valueOf(1).equals(dto.getAdministrador()));
         return operario;
     }
 

@@ -1,7 +1,6 @@
 package F110.controller;
 
 import F110.dto.IsometricoDTO;
-import F110.model.EstadoIsometrico;
 import F110.model.Isometrico;
 import F110.service.IBloqueService;
 import F110.service.IIsometricoService;
@@ -17,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Expone las operaciones de la API para consultar y administrar isométricos.
@@ -111,18 +109,6 @@ public class IsometricoController {
     }
 
     /**
-     * Crea un isométrico a partir de los datos recibidos.
-     *
-     * @param dto datos del isométrico que se va a crear
-     * @return respuesta con el isométrico creado y estado 201
-     */
-    @PostMapping
-    public ResponseEntity<IsometricoDTO> save(@RequestBody IsometricoDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(toDTO(isometricoService.save(toEntity(dto))));
-    }
-
-    /**
      * Crea y publica un isométrico asociado a un bloque y a un archivo PDF.
      *
      * @param codigoIsometrico código del isométrico
@@ -171,20 +157,6 @@ public class IsometricoController {
     }
 
     /**
-     * Actualiza el estado de un isométrico.
-     *
-     * @param id identificador del isométrico
-     * @param request solicitud con el nuevo estado
-     * @return datos del isométrico actualizado
-     */
-    @PutMapping("/{id}/estado")
-    public IsometricoDTO updateEstado(
-            @PathVariable Long id,
-            @RequestBody EstadoRequest request) {
-        return toDTO(isometricoService.updateEstado(id, request.estado()));
-    }
-
-    /**
      * Elimina el isométrico indicado y responde sin contenido.
      *
      * @param id identificador del isométrico que se va a eliminar
@@ -229,41 +201,4 @@ public class IsometricoController {
                 .build();
     }
 
-    /**
-     * Representa la solicitud para cambiar el estado de un isométrico.
-     *
-     */
-        public static final class EstadoRequest {
-        private final EstadoIsometrico estado;
-
-        /**
-         * @param estado nuevo estado del isométrico
-         */
-        public EstadoRequest(EstadoIsometrico estado) {
-            this.estado = estado;
-        }
-
-        public EstadoIsometrico estado() {
-            return estado;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (EstadoRequest) obj;
-            return Objects.equals(this.estado, that.estado);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(estado);
-        }
-
-        @Override
-        public String toString() {
-            return "EstadoRequest[" +
-                    "estado=" + estado + ']';
-        }
-    }
 }

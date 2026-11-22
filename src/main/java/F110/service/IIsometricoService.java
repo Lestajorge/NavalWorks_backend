@@ -1,7 +1,6 @@
 package F110.service;
 
 import F110.model.Isometrico;
-import F110.model.EstadoIsometrico;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -25,17 +24,11 @@ public interface IIsometricoService {
 
 
 
-    /** Obtiene todos los isométricos, incluidos los no publicados, para administración. */
+    /** Obtiene todos los isométricos para administración. */
     List<Isometrico> findAllForAdmin();
 
-    /** Crea un isométrico, guarda su PDF y lo publica. */
+    /** Guarda el PDF y crea el isométrico publicado solo si ambas operaciones tienen éxito. */
     Isometrico createPublished(Isometrico isometrico, MultipartFile file) throws IOException;
-
-    /** Cambia el estado del isométrico, con las validaciones de publicación correspondientes. */
-    Isometrico updateEstado(Long id, EstadoIsometrico estado);
-
-    /** Guarda el isométrico estableciendo su estado según tenga o no una URL de PDF. */
-    Isometrico save(Isometrico isometrico);
 
     /** Actualiza los datos principales de un isométrico existente. */
     Isometrico update(Long id, Isometrico isometrico);

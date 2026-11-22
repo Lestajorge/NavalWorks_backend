@@ -1,6 +1,8 @@
 package F110.dto;
 
 import F110.enums.model.Especialista;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,5 +25,16 @@ public class OperarioCreateDTO {
 
     /** Especialidad que se asignará al operario. */
     private Especialista especialista;
+
+    /** Nombre de usuario opcional para cuentas de encargado. */
+    private String usuario;
+
+    /** Contraseña en texto claro recibida para codificarla antes de guardarla. */
+    private String password;
+
+    /** Valor 1 para conceder permisos de administrador y 0 para un operario normal. */
+    @Min(0)
+    @Max(1)
+    private Integer administrador;
 
 }

@@ -34,14 +34,13 @@ Módulo de Bloques (/api/bloques): CRUD y búsqueda por código. `GET /api/bloqu
 Módulo de Isométricos (/api/isometricos): CRUD, búsqueda y gestión de PDFs de planos de tubería.
 Módulo de Trabajos (/api/trabajos): CRUD y consulta por isométrico, estado u operario.
 Módulo de Operarios (/api/operarios): CRUD y búsqueda por especialista, nombre o apellidos.
-Autenticación: `POST /api/auth/admin` comprueba las credenciales y confirma que la cuenta tenga el rol de administrador. Las peticiones protegidas, incluidas las consultas GET, se autentican aparte mediante HTTP Basic sin estado; ese control lo aplica Spring Security, no la lógica de `GET /api/bloques`. Las operaciones de escritura requieren el rol de administrador; la creación de operarios (POST /api/operarios) sigue permitida sin autenticación.
+Autenticación: `POST /api/auth/admin` comprueba las credenciales y confirma que la cuenta tenga el rol de administrador. Las peticiones protegidas, incluidas las consultas GET, se autentican aparte mediante HTTP Basic sin estado; ese control lo aplica Spring Security, no la lógica de `GET /api/bloques`. Las operaciones de escritura requieren el rol de administrador. Al crear un encargado en `POST /api/operarios`, se pueden enviar `usuario`, `password` y `administrador: 1` junto con sus datos; el backend guarda la contraseña codificada y habilita su uso tanto en HTTP Basic como en el acceso de administrador.
 
 Gestión de isométricos para administradores:
-- `GET /api/isometricos/admin` devuelve todos los isométricos, incluidos borradores y archivados; requiere rol de administrador.
-- `POST /api/isometricos` consume `multipart/form-data` con `codigoIsometrico`, `bloqueId` y el PDF en el campo `file`; al guardar el PDF, crea el registro como `PUBLICADO`. Para crear un borrador, envía JSON sin `pdfUrl` y después sube el PDF a `/api/isometricos/{id}/pdf`.
-- `PUT /api/isometricos/{id}/estado` recibe JSON como `{"estado":"PUBLICADO"}` o `{"estado":"ARCHIVADO"}`. Solo permite esos dos estados; publicar requiere que el isométrico tenga PDF.
-- Los endpoints normales de consulta y la consulta por bloque solo muestran isométricos `PUBLICADO`, para impedir asignar borradores o archivados.
-- Los estados posibles son `BORRADOR`, `PUBLICADO` y `ARCHIVADO`.
+- `GET /api/isometricos/admin` devuelve todos los isométricos; requiere autenticación.
+- `POST /api/isometricos` requiere `multipart/form-data` con `codigoIsometrico`, `bloqueId` y un PDF en el campo `file`. Si falta el PDF o no se puede guardar, no se crea el registro; si la operación tiene éxito, queda `PUBLICADO`.
+- No se permite crear isométricos mediante JSON ni guardar isométricos sin PDF. `POST /api/isometricos/{id}/pdf` sirve para cargar o reemplazar el PDF de un isométrico existente.
+- Todo isométrico tiene el único estado posible: `PUBLICADO`. No existe una operación para cambiar su estado.
 
 
 La cuenta inicial se crea al arrancar si se configura `APP_ADMIN_PASSWORD` (el usuario es `admin` por defecto). Por ejemplo: `APP_ADMIN_PASSWORD=<tu-contraseña-inicial> ./mvnw spring-boot:run`. La contraseña queda almacenada con BCrypt y no se sobrescribe si la cuenta ya existe. Cambia la contraseña inicial antes de desplegar en un entorno real.

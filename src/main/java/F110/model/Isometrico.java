@@ -33,10 +33,10 @@ public class Isometrico {
     @ColumnDefault("'PUBLICADO'")
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private EstadoIsometrico estado = EstadoIsometrico.BORRADOR;
+    private EstadoIsometrico estado = EstadoIsometrico.PUBLICADO;
 
     /** URL del archivo PDF asociado al isométrico. */
-    @Column(name = "pdf_url", length = 500)
+    @Column(name = "pdf_url", nullable = false, length = 500)
     private String pdfUrl;
 
     /** Bloque al que pertenece este isométrico. */
