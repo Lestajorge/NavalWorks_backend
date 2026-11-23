@@ -44,8 +44,8 @@ public class Isometrico {
     @JoinColumn(name = "bloque_id", nullable = false)
     private Bloque bloque;
 
-    /** Trabajos asociados; se eliminan al borrar el isométrico. */
-    @OneToMany(mappedBy = "isometrico", cascade = CascadeType.ALL, orphanRemoval = true)
+    /** Trabajos asociados; no se eliminan en cascada al borrar el isométrico. */
+    @OneToMany(mappedBy = "isometrico")
     @Builder.Default
     private List<Trabajo> trabajos = new ArrayList<>();
 }

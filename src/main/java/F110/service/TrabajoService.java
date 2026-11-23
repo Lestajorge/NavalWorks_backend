@@ -7,8 +7,10 @@ import F110.repository.OperarioRepository;
 import F110.repository.TrabajoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -55,6 +57,14 @@ public class TrabajoService implements ITrabajoService {
     /** Persiste el trabajo recibido. */
     @Override
     public Trabajo save(Trabajo trabajo) {
+        if (trabajoRepository.existsByIsometricoId(trabajo.getIsometrico().getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe un trabajo asociado a este isométrico");
+        }
+        trabajo.setEstado(trabajo.getOperarios().isEmpty()
+                ? EstadoTrabajo.PENDIENTE
+                : EstadoTrabajo.EN_EJECUCION);
         return trabajoRepository.save(trabajo);
     }
 
@@ -62,6 +72,18 @@ public class TrabajoService implements ITrabajoService {
     @Override
     public Trabajo update(Long id, Trabajo trabajo) {
         Trabajo trabajoExistente = findById(id);
+        if (trabajoRepository.existsByIsometricoIdAndIdNot(
+                trabajo.getIsometrico().getId(), id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya existe otro trabajo asociado a este isométrico");
+        }
+        if (trabajo.getEstado() == EstadoTrabajo.PENDIENTE
+                && !trabajo.getOperarios().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Un trabajo pendiente no puede tener operarios asignados");
+        }
         trabajoExistente.setEstado(trabajo.getEstado());
         trabajoExistente.setIsometrico(trabajo.getIsometrico());
         trabajoExistente.setOperarios(trabajo.getOperarios());
@@ -76,6 +98,9 @@ public class TrabajoService implements ITrabajoService {
         Operario operario = operarioRepository.findById(operarioId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "No existe el operario con id: " + operarioId));
+        if (trabajo.getEstado() == EstadoTrabajo.PENDIENTE) {
+            trabajo.setEstado(EstadoTrabajo.EN_EJECUCION);
+        }
         trabajo.getOperarios().add(operario);
         return trabajoRepository.save(trabajo);
     }

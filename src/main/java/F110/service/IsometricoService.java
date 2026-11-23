@@ -3,10 +3,12 @@ package F110.service;
 import F110.model.Isometrico;
 import F110.model.EstadoIsometrico;
 import F110.repository.IsometricoRepository;
+import F110.repository.TrabajoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +28,7 @@ public class IsometricoService implements IIsometricoService {
     private static final Path PDF_DIRECTORY = Paths.get("uploads", "isometricos");
 
     private final IsometricoRepository isometricoRepository;
+    private final TrabajoRepository trabajoRepository;
 
     /** Devuelve únicamente los isométricos publicados. */
     @Override
@@ -150,9 +153,16 @@ public class IsometricoService implements IIsometricoService {
         return pdfPath;
     }
 
-    /** Elimina el isométrico publicado indicado. */
+    /** Elimina un isométrico publicado solo si no está asociado a ningún trabajo. */
     @Override
+    @Transactional
     public void delete(Long id) {
-        isometricoRepository.delete(findById(id));
+        Isometrico isometrico = findById(id);
+        if (trabajoRepository.existsByIsometricoId(id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "No se puede eliminar el isométrico porque está asociado a uno o más trabajos");
+        }
+        isometricoRepository.delete(isometrico);
     }
 }

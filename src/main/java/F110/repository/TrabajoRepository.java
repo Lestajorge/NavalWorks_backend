@@ -17,6 +17,12 @@ public interface TrabajoRepository extends JpaRepository<Trabajo, Long> {
     /** Obtiene los trabajos asociados al identificador de isométrico indicado. */
     List<Trabajo> findByIsometricoId(Long isometricoId);
 
+    /** Comprueba si otro trabajo ya está asociado al isométrico indicado. */
+    boolean existsByIsometricoId(Long isometricoId);
+
+    /** Comprueba si otro trabajo distinto del indicado usa el mismo isométrico. */
+    boolean existsByIsometricoIdAndIdNot(Long isometricoId, Long id);
+
     /** Obtiene los trabajos que se encuentran en el estado indicado. */
     List<Trabajo> findByEstado(EstadoTrabajo estado);
 

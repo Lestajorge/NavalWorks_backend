@@ -39,8 +39,14 @@ Autenticación: `POST /api/auth/admin` comprueba las credenciales y confirma que
 Gestión de isométricos para administradores:
 - `GET /api/isometricos/admin` devuelve todos los isométricos; requiere autenticación.
 - `POST /api/isometricos` requiere `multipart/form-data` con `codigoIsometrico`, `bloqueId` y un PDF en el campo `file`. Si falta el PDF o no se puede guardar, no se crea el registro; si la operación tiene éxito, queda `PUBLICADO`.
+- `DELETE /api/isometricos/{id}` requiere rol de administrador y solo elimina el isométrico si no está asociado a ningún trabajo; si tiene trabajos asociados, responde `409 Conflict`.
 - No se permite crear isométricos mediante JSON ni guardar isométricos sin PDF. `POST /api/isometricos/{id}/pdf` sirve para cargar o reemplazar el PDF de un isométrico existente.
 - Todo isométrico tiene el único estado posible: `PUBLICADO`. No existe una operación para cambiar su estado.
+
+Gestión de trabajos:
+- `DELETE /api/trabajos/{id}` elimina un trabajo y sus asignaciones de operarios; requiere autenticación como administrador.
+- No se permite crear ni actualizar un trabajo con un isométrico que ya esté asociado a otro trabajo; en ese caso la API responde `409 Conflict`.
+- La API no incluye una interfaz web: el cliente de administración debe invocar este endpoint para ofrecer la opción de eliminar en la lista de trabajos.
 
 
 La cuenta inicial se crea al arrancar si se configura `APP_ADMIN_PASSWORD` (el usuario es `admin` por defecto). Por ejemplo: `APP_ADMIN_PASSWORD=<tu-contraseña-inicial> ./mvnw spring-boot:run`. La contraseña queda almacenada con BCrypt y no se sobrescribe si la cuenta ya existe. Cambia la contraseña inicial antes de desplegar en un entorno real.
