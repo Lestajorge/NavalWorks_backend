@@ -35,9 +35,11 @@ public class Trabajo {
     private EstadoTrabajo estado; // PENDIENTE, EN_EJECUCION, REVISADO, ACEPTADO
 
     /** Isométrico al que pertenece este trabajo. */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "isometrico_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "isometrico_id", nullable = false, unique = true)
     private Isometrico isometrico;
+
+ 
 
     /** Operarios asignados; la relación se guarda en la tabla intermedia {@code trabajo_operarios}. */
     @ManyToMany
