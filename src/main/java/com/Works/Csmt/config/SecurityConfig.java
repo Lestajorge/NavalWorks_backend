@@ -51,7 +51,7 @@ public class SecurityConfig {
      * Busca las cuentas en la base de datos cuando Spring necesita autenticar
      * a alguien y las convierte al formato que entiende Spring Security.
      *
-     * El rol asignado depende de si el operario está marcado como administrador.
+     * Las cuentas con credenciales se clasifican como administrador o encargado.
      *
      * @return servicio que carga un usuario a partir de su nombre de usuario
      */
@@ -64,7 +64,9 @@ public class SecurityConfig {
 
             return User.withUsername(operario.getUsuario())
                     .password(operario.getPassword())
-                    .roles(operario.isAdministrador() ? "ADMINISTRADOR" : "OPERARIO")
+                    .roles(operario.isAdministrador()
+                            ? "ADMINISTRADOR"
+                            : "ENCARGADO")
                     .build();
         };
     }
@@ -73,8 +75,8 @@ public class SecurityConfig {
      * Define las reglas de seguridad para las peticiones HTTP de la aplicación.
      *
      * Los administradores pueden usar todos los endpoints de la API. Los
-     * operarios pueden consultar la API y añadir o quitar operarios de un
-     * trabajo. El inicio de sesión de administrador es público. Usa HTTP Basic,
+     * encargados pueden consultar la API y añadir o quitar operarios de un
+     * trabajo. El inicio de sesión es público. Usa HTTP Basic,
      * no crea sesiones y responde con estado 401 si falta la autenticación.
      *
      * @param http configuración HTTP de Spring Security
@@ -86,17 +88,18 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/admin").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**")
-                        .hasAnyRole("ADMINISTRADOR", "OPERARIO")
+                        .hasAnyRole("ADMINISTRADOR", "ENCARGADO", "OPERARIO")
                         .requestMatchers(HttpMethod.DELETE, "/api/isometricos/*")
                         .hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/trabajos/*")
                         .hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.POST, "/api/trabajos/*/operarios/*")
-                        .hasAnyRole("ADMINISTRADOR", "OPERARIO")
+                        .hasAnyRole("ADMINISTRADOR", "ENCARGADO", "OPERARIO")
                         .requestMatchers(HttpMethod.DELETE, "/api/trabajos/*/operarios/*")
-                        .hasAnyRole("ADMINISTRADOR", "OPERARIO")
+                        .hasAnyRole("ADMINISTRADOR", "ENCARGADO", "OPERARIO")
                         .requestMatchers("/api/**")
                         .hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated()

@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Expone los endpoints relacionados con la autenticación.
  *
- * En esta clase se ofrece el inicio de sesión para administradores: se
- * comprueban sus credenciales y se confirma que la cuenta tenga el rol
- * administrador antes de responder.
+ * Ofrece el inicio de sesión general y una ruta específica para administradores.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -29,8 +27,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private static final String ADMIN_ROLE = "ROLE_ADMINISTRADOR";
+    private static final String ENCARGADO_ROLE = "ROLE_ENCARGADO";
 
     private final AuthenticationManager authenticationManager;
+
+    @PostMapping("/login")
+    public ResponseEntity<AdministradorLoginResponseDTO> login(
+            @Valid @RequestBody OperarioLoginDTO login) {
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(login.getUsuario(), login.getPassword()));
+        } catch (AuthenticationException exception) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String rol = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(authority -> ADMIN_ROLE.equals(authority) || ENCARGADO_ROLE.equals(authority))
+                .map(authority -> authority.substring("ROLE_".length()))
+                .findFirst()
+                .orElse("OPERARIO");
+        return ResponseEntity.ok(new AdministradorLoginResponseDTO(authentication.getName(), rol));
+    }
 
     /**
      * Comprueba las credenciales y permite iniciar sesión solo a administradores.

@@ -27,4 +27,7 @@ public class OperarioDTO {
 
     /** Especialidad asignada al operario. */
     private Especialista especialista;
+
+    /** Tipo de cuenta: ADMINISTRADOR, ENCARGADO u OPERARIO. */
+    private String tipoCuenta;
 }

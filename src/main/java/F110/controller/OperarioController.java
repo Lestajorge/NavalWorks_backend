@@ -167,6 +167,9 @@ public class OperarioController {
                 .nombre(operario.getNombre())
                 .apellidos(operario.getApellidos())
                 .especialista(operario.getEspecialista())
+                .tipoCuenta(operario.isAdministrador()
+                        ? "ADMINISTRADOR"
+                        : operario.getUsuario() != null ? "ENCARGADO" : "OPERARIO")
                 .build();
     }
 }

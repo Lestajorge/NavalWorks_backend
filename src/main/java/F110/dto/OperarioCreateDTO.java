@@ -26,13 +26,13 @@ public class OperarioCreateDTO {
     /** Especialidad que se asignará al operario. */
     private Especialista especialista;
 
-    /** Nombre de usuario opcional para cuentas de encargado. */
+    /** Nombre de usuario para una cuenta de acceso (administrador o encargado). */
     private String usuario;
 
     /** Contraseña en texto claro recibida para codificarla antes de guardarla. */
     private String password;
 
-    /** Valor 1 para conceder permisos de administrador y 0 para un operario normal. */
+    /** Valor 1 para administrador; 0 para encargado si se incluyen credenciales, operario si no. */
     @Min(0)
     @Max(1)
     private Integer administrador;

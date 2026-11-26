@@ -225,9 +225,11 @@ spring.jpa.hibernate.ddl-auto=update
 
 Configura la contraseña de MySQL mediante `DB_PASSWORD` o en `application.properties`.
 
-### Cuenta administradora
+### Cuentas de acceso
 
-La cuenta inicial se crea o actualiza al arrancar si se configura una contraseña:
+Al arrancar, si se configura `APP_ADMIN_PASSWORD`, la aplicación busca la cuenta
+indicada: si no existe, la crea; si ya existe, conserva su contraseña y asegura
+que tenga rol de administrador. La cuenta se guarda en la base de datos:
 
 ```bash
 APP_ADMIN_USERNAME=admin \
@@ -238,9 +240,32 @@ APP_ADMIN_PASSWORD='contraseña-inicial' \
 Las variables disponibles son:
 
 - `APP_ADMIN_USERNAME`: nombre de usuario, `admin` por defecto.
-- `APP_ADMIN_PASSWORD`: contraseña inicial obligatoria para crear el administrador.
+- `APP_ADMIN_PASSWORD`: necesaria para crear la cuenta administradora inicial.
 - `DB_USERNAME`: usuario de MySQL, `root` por defecto.
 - `DB_PASSWORD`: contraseña de MySQL.
+
+Un administrador autenticado puede crear cuentas adicionales mediante
+`POST /api/operarios`. En el JSON, `administrador: 1` crea un administrador;
+`administrador: 0` junto con `usuario` y `password` crea un encargado; con
+`administrador: 0` y sin credenciales crea un operario sin acceso de inicio de
+sesión. Las contraseñas se guardan codificadas. El endpoint `POST /api/auth/login`
+valida las credenciales y devuelve el rol (`ADMINISTRADOR` o `ENCARGADO`).
+
+Ejemplo de alta de encargado (para administrador, cambia `administrador` a `1`):
+
+```json
+{
+  "nombre": "Ana",
+  "apellidos": "Lopez",
+  "especialista": "TUBERO",
+  "administrador": 0,
+  "usuario": "ana",
+  "password": "una-contraseña-segura"
+}
+```
+
+Este repositorio contiene el backend, no la interfaz de la app; la pantalla para
+seleccionar el tipo de cuenta debe enviar esos campos a `POST /api/operarios`.
 
 Si `APP_ADMIN_PASSWORD` no está definida, no se crea ni modifica la cuenta administradora.
 

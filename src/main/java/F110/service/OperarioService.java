@@ -52,21 +52,29 @@ public class OperarioService implements IOperarioService {
         return operarioRepository.findByAdministradorFalseAndApellidosContainingIgnoreCase(apellidos);
     }
 
-    /** Guarda un operario y, si es administrador, almacena sus credenciales protegidas. */
+    /** Guarda el registro y protege las credenciales de administradores y encargados. */
     @Override
     public Operario save(Operario operario) {
-        if (operario.isAdministrador()) {
-            if (operario.getUsuario() == null || operario.getUsuario().isBlank()
-                    || operario.getPassword() == null || operario.getPassword().isBlank()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "El encargado debe tener usuario y contraseña");
-            }
-            operario.setUsuario(operario.getUsuario().trim());
-            operario.setPassword(passwordEncoder.encode(operario.getPassword()));
-        } else {
+        boolean hasUsername = operario.getUsuario() != null && !operario.getUsuario().isBlank();
+        boolean hasPassword = operario.getPassword() != null && !operario.getPassword().isBlank();
+
+        if (operario.isAdministrador() && (!hasUsername || !hasPassword)
+                || hasUsername != hasPassword) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Las cuentas con acceso deben tener usuario y contraseña");
+        }
+
+        if (!hasUsername) {
             operario.setUsuario(null);
             operario.setPassword(null);
+            return operarioRepository.save(operario);
         }
+
+        operario.setUsuario(operario.getUsuario().trim());
+        if (operarioRepository.findByUsuario(operario.getUsuario()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El nombre de usuario ya está en uso");
+        }
+        operario.setPassword(passwordEncoder.encode(operario.getPassword()));
         return operarioRepository.save(operario);
     }
 

@@ -14,9 +14,8 @@ import org.springframework.stereotype.Component;
 /**
  * Prepara la cuenta administradora al arrancar la aplicación.
  *
- * Lee el usuario y la contraseña de la configuración. Si hay una contraseña,
- * busca la cuenta indicada; si no existe, la crea. Después se asegura de que
- * esa cuenta tenga permisos de administrador y guarda el resultado.
+ * Lee el usuario y la contraseña de la configuración y crea la cuenta solo si
+ * todavía no existe. La cuenta queda guardada en la base de datos.
  */
 @Slf4j
 @Component
@@ -35,16 +34,15 @@ public class AdminAccountInitializer implements ApplicationRunner {
     /**
      * Comprueba y prepara la cuenta administradora al iniciar Spring Boot.
      *
-     * Si no se ha configurado una contraseña, no crea ni modifica ninguna
-     * cuenta. En caso contrario, reutiliza el operario con el usuario indicado
-     * o crea uno nuevo, le asigna permisos de administrador y guarda los cambios.
+     * Si no se ha configurado una contraseña, no crea ninguna cuenta. En caso
+     * contrario, reutiliza la cuenta indicada o crea una nueva y le asigna
+     * permisos de administrador.
      *
      * @param args argumentos usados para arrancar la aplicación
      */
     @Override
     public void run(ApplicationArguments args) {
         if (password.isBlank()) {
-            operarioRepository.clearCredentialsForNonAdministrators();
             log.info("Creación de administrador omitida: configura APP_ADMIN_PASSWORD");
             return;
         }
@@ -55,7 +53,7 @@ public class AdminAccountInitializer implements ApplicationRunner {
                         .apellidos("Sistema")
                         .usuario(username)
                         .password(passwordEncoder.encode(password))
-                        .especialista(Especialista.TUBERO)
+                        .especialista(Especialista.ENCARGADO)
                         .administrador(true)
                         .build());
 
@@ -64,7 +62,6 @@ public class AdminAccountInitializer implements ApplicationRunner {
         }
 
         operarioRepository.save(admin);
-        operarioRepository.clearCredentialsForNonAdministrators();
         log.info("Cuenta administradora '{}' comprobada", username);
     }
 }
