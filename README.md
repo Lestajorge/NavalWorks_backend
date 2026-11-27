@@ -12,7 +12,7 @@ El backend no incluye interfaz gráfica. Las aplicaciones cliente, como Android 
 - Creación y asignación de trabajos.
 - Asociación de operarios a trabajos.
 - Filtrado de trabajos por isométrico, estado y operario.
-- Control de estados y permisos según el rol del usuario.
+- Control de estados y permisos según el tipo de cuenta.
 - Autenticación HTTP Basic sin estado.
 - Cuenta administradora configurable mediante variables de entorno.
 - Contraseñas cifradas con BCrypt.
@@ -25,7 +25,7 @@ El backend no incluye interfaz gráfica. Las aplicaciones cliente, como Android 
 - Ya no se permiten isométricos sin PDF.
 - La creación se realiza mediante `multipart/form-data` y guarda primero el archivo PDF.
 - Si falla el guardado del archivo o de la entidad, no queda un isométrico huérfano.
-- Los archivos se almacenan con nombre UUID en `uploads/isometricos`.
+- Al crear un isométrico, su PDF se almacena con nombre UUID en `uploads/isometricos`; al reemplazarlo, se usa el ID del isométrico y el nombre original del archivo.
 - Se puede reemplazar el PDF de un isométrico existente.
 - Un isométrico no se puede eliminar si tiene trabajos asociados; la API responde `409 Conflict`.
 
@@ -42,11 +42,11 @@ El backend no incluye interfaz gráfica. Las aplicaciones cliente, como Android 
 
 ### Seguridad y operarios
 
-- Las consultas `GET` requieren autenticación con los roles `ADMINISTRADOR` u `OPERARIO`.
-- Las operaciones de escritura requieren el rol `ADMINISTRADOR`.
-- El administrador puede eliminar isométricos y trabajos.
-- Administradores y operarios pueden añadir o retirar operarios de un trabajo.
-- Un operario puede recibir usuario, contraseña y permisos de administrador al crearlo.
+- Las consultas `GET` requieren autenticación. Las cuentas con credenciales reciben el rol `ADMINISTRADOR` o `ENCARGADO`.
+- Las operaciones de escritura requieren el rol `ADMINISTRADOR`, salvo añadir o retirar operarios de un trabajo, que también permite `ENCARGADO` (la configuración incluye además el rol `OPERARIO` para estas rutas y las consultas).
+- Solo el administrador puede eliminar isométricos y trabajos.
+- Un `OPERARIO` sin credenciales no puede iniciar sesión; `OPERARIO` es el tipo de cuenta que devuelve la API para esos registros.
+- Un registro de operario puede tener especialidad `ENCARGADO` sin que eso le conceda acceso: el rol de la cuenta depende de `administrador` y de si tiene credenciales.
 - Las contraseñas se almacenan cifradas y no se devuelven en los DTO.
 - Se usa autenticación HTTP Basic con sesiones deshabilitadas.
 
@@ -70,12 +70,11 @@ La jerarquía principal es:
 
 - Java 23
 - Spring Boot 4.1.1
-- Spring Web MVC
+- Spring Web MVC y Spring Security
 - Spring Data JPA / Hibernate
-- Spring Security
 - Spring Validation
 - MySQL 8
-- Maven
+- Maven (se incluye Maven Wrapper)
 - Lombok
 - BCrypt
 
@@ -87,7 +86,7 @@ Representa una sección estructural de la fragata.
 
 ### Isométrico
 
-Plano de tuberías asociado a un bloque. Contiene un código, el estado `PUBLICADO` y la ruta de su archivo PDF.
+Plano de tuberías asociado a un bloque. Contiene un código, el estado `PUBLICADO` y la ruta de su archivo PDF. Al crear un isométrico el PDF se guarda con nombre UUID; al reemplazarlo, se guarda con el identificador del isométrico y el nombre original del archivo.
 
 ### Trabajo
 
@@ -102,11 +101,13 @@ Estados disponibles:
 
 ### Operario
 
-Personal técnico del astillero. Especialidades disponibles:
+Personal técnico del astillero. Las especialidades disponibles son:
 
 - `TUBERO`
 - `SOLDADOR`
-- `INSPECTOR_CALIDAD`
+- `ENCARGADO`
+
+La especialidad describe la función del registro; no equivale al tipo de cuenta (`ADMINISTRADOR`, `ENCARGADO` u `OPERARIO`).
 
 ## API REST
 
@@ -116,7 +117,8 @@ La URL base local es `http://localhost:8080`.
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/api/auth/admin` | Comprueba las credenciales y el rol administrador | Público |
+| `POST` | `/api/auth/login` | Valida usuario y contraseña; devuelve usuario y tipo de cuenta | Público |
+| `POST` | `/api/auth/admin` | Valida credenciales y permite el acceso solo a administradores | Público |
 
 Las restantes peticiones protegidas utilizan HTTP Basic:
 
@@ -129,6 +131,7 @@ curl -u usuario:contraseña http://localhost:8080/api/bloques
 | Método | Ruta | Descripción |
 |---|---|---|
 | `GET` | `/api/bloques` | Lista todos los bloques |
+| `GET` | `/api/bloques/HolaMundo` | Comprueba que la API responde |
 | `GET` | `/api/bloques/{id}` | Obtiene un bloque |
 | `GET` | `/api/bloques/codigo/{codigo}` | Busca por código |
 | `POST` | `/api/bloques` | Crea un bloque |
@@ -181,7 +184,7 @@ Solo se aceptan archivos cuyo nombre termine en `.pdf`. El límite configurado e
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/api/operarios` | Lista todos los operarios |
+| `GET` | `/api/operarios` | Lista los operarios que no son administradores |
 | `GET` | `/api/operarios/{id}` | Obtiene un operario |
 | `GET` | `/api/operarios/especialista/{especialista}` | Filtra por especialidad |
 | `GET` | `/api/operarios/nombre/{nombre}` | Filtra por nombre |
@@ -203,7 +206,7 @@ Ejemplo de creación de operario administrador:
 }
 ```
 
-El campo `administrador` admite `0` para operario normal y `1` para administrador.
+El campo `administrador` admite `0` o `1`. Para crear una cuenta de acceso, se deben enviar `usuario` y `password`; con `administrador: 0` se crea una cuenta `ENCARGADO`, y con `administrador: 1`, una cuenta `ADMINISTRADOR`. Si se omiten ambas credenciales y se indica `administrador: 0`, se crea un `OPERARIO` sin acceso de inicio de sesión. Deben enviarse juntas ambas credenciales.
 
 ## Configuración local
 
